@@ -140,8 +140,9 @@ ezharquizz/
 - **MediaPipe HandLandmarker**, `numHands: 2`, berjalan pada video frame
   (`detectForVideo`).
 - **Kalibrasi pemain:** layar kalibrasi sebelum game — kedua pemain mengangkat
-  tangan; tangan di sisi kiri frame = Pemain 1, sisi kanan = Pemain 2. Tombol
-  "Lanjut" aktif setelah 2 tangan terdeteksi stabil ± 1,5 detik. Tersedia tombol
+  tangan; tangan di sisi kiri frame = Pemain 1, sisi kanan = Pemain 2. Setelah
+  2 tangan terdeteksi stabil ± 1,5 detik, permainan **dimulai otomatis**
+  tanpa tombol *(revisi Sprint 7; sebelumnya tombol "Lanjut")*. Tersedia tombol
   "Main dengan Keyboard" untuk beralih mode.
 - **Gesture jepit:** jarak ujung jempol (landmark 4) ke ujung telunjuk (landmark 8)
   < 0,5 × jarak pergelangan (0) ke ruas tengah jari tengah (9) = jepit.

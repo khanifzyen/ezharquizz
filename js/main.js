@@ -6,8 +6,8 @@
  *                   PRD F2 / Keyboard), panel Cara Main, simpan/pulihkan
  *                   localStorage.
  *  - CALIBRATION  : preview kamera besar mirrored + overlay landmark; 2 tangan
- *                   stabil 1,5 detik → tombol Lanjut; "Main dengan Keyboard"
- *                   selalu tersedia (ganti mode tanpa reload).
+ *                   stabil 1,5 detik → LANJUT OTOMATIS ke game (Sprint 7);
+ *                   "Main dengan Keyboard" selalu tersedia (ganti mode tanpa reload).
  *  - GAME         : panel pertanyaan + HUD digerakkan callback dari GameRenderer;
  *                   mode kamera: input = HandSource (gesture, Sprint 3) + video
  *                   sebagai LATAR PENUH (Sprint 5 — posisi kursor = posisi tangan
@@ -28,14 +28,14 @@
  * input renderer diganti KeyboardInputSource tanpa reload (setSources).
  */
 
-// ?v=6 = cache-busting aset (harus sama dengan versi di index.html). Static
+// ?v=7 = cache-busting aset (harus sama dengan versi di index.html). Static
 // hosting & server dev sederhana bisa menyajikan modul lama dari cache —
 // versi pada SETIAP import internal menjamin satu set aset yang konsisten.
-import { loadQuestions, pickRandomQuestions } from './data.js?v=6';
-import { GameRenderer, KeyboardInputSource, DEFAULT_KEYMAPS } from './renderer.js?v=6';
-import { Confetti, FESTIVE_COLORS } from './confetti.js?v=6';
-import { HandSource } from './hand-input.js?v=6';
-import { initEditor } from './editor.js?v=6';
+import { loadQuestions, pickRandomQuestions } from './data.js?v=7';
+import { GameRenderer, KeyboardInputSource, DEFAULT_KEYMAPS } from './renderer.js?v=7';
+import { Confetti, FESTIVE_COLORS } from './confetti.js?v=7';
+import { HandSource } from './hand-input.js?v=7';
+import { initEditor } from './editor.js?v=7';
 
 /* ---------------- Konstanta ---------------- */
 
@@ -95,7 +95,6 @@ const calib = {
   error: $('calib-error'),
   progressFill: $('calib-progress-fill'),
   chip: { 1: $('calib-chip-p1'), 2: $('calib-chip-p2') },
-  btnNext: $('btn-calib-next'),
   btnKeyboard: $('btn-calib-keyboard'),
 };
 const camBg = { box: $('camera-bg'), overlay: $('bg-overlay') };
@@ -171,7 +170,7 @@ function startGame() {
   state.mode = checked ? checked.value : 'keyboard';
   saveWelcomeState();
   if (state.mode === 'camera') {
-    openCalibration(); // async — ke GAME lewat tombol Lanjut / fallback keyboard
+    openCalibration(); // async — ke GAME OTOMATIS setelah 2 tangan stabil / fallback keyboard
   } else {
     destroyCamera(); // jaga-jaga bila masih ada sesi kamera lama yang hidup
     beginSession();
@@ -368,6 +367,7 @@ const cam = {
   video: null, // elemen <video> tunggal, dipindah kalibrasi ↔ PiP
   uiRaf: 0, // loop UI overlay/indikator (terpisah dari game loop & loop deteksi)
   stability: null, // akumulator "2 tangan stabil" layar kalibrasi
+  _autoStarted: false, // guard lanjut-otomatis kalibrasi (Sprint 7 — sekali saja)
   flowSeq: 0, // token pembatalan alur async (mis. tombol ditekan saat loading)
   noticeTimer: 0, // timeout auto-hide notifikasi GAME (Sprint 4 — anti leak)
   _onStreamEnded: null, // handler 'ended' track/video (Sprint 4 — kamera mati)
@@ -414,7 +414,7 @@ function switchToKeyboardMode() {
 async function openCalibration() {
   const flow = ++cam.flowSeq;
   showScreen('calibration');
-  calib.btnNext.disabled = true;
+  cam._autoStarted = false;
   calib.error.hidden = true;
   calib.loading.hidden = false;
   calib.loading.textContent = 'Menyiapkan kamera…';
@@ -466,9 +466,10 @@ function handleCameraFailure(err) {
   }, 3200);
 }
 
-/** Tombol "Lanjut": masuk ke GAME dengan kamera tetap hidup (video pindah ke PiP). */
+/** Kalibrasi selesai (2 tangan stabil 1,5 dtk → LANJUT OTOMATIS, Sprint 7):
+ *  masuk ke GAME dengan kamera tetap hidup. */
 function continueFromCalibration() {
-  if (!cam.ctrl || calib.btnNext.disabled) return;
+  if (!cam.ctrl || state.screen !== 'calibration') return;
   stopCameraUiLoop(); // direstart oleh beginSession setelah layar GAME tampil
   beginSession();
 }
@@ -621,11 +622,20 @@ function updateCalibrationUi(dt) {
 
   const st = cam.stability.update(present[1] && present[2], dt * 1000);
   setCalibProgress(st.progress);
-  calib.btnNext.disabled = !st.stable;
+
+  // Sprint 7: 2 tangan stabil 1,5 detik → masuk GAME OTOMATIS (tanpa tombol).
+  if (st.stable) {
+    if (!cam._autoStarted) {
+      cam._autoStarted = true;
+      calib.status.textContent = 'Siap! Kedua tangan stabil — memulai permainan…';
+      continueFromCalibration();
+    }
+    return; // layar sedang berganti — jangan gambar overlay lagi
+  }
 
   let text;
   if (present[1] && present[2]) {
-    text = st.stable ? 'Siap! Kedua tangan stabil — tekan Lanjut.' : 'Dua tangan terdeteksi — tahan posisi…';
+    text = 'Dua tangan terdeteksi — tahan posisi…';
   } else if (ctrl.unassigned && ctrl.unassigned.present) {
     text = 'Satu tangan terdeteksi — pemain kedua ikut mengangkat tangan.';
   } else {
@@ -772,7 +782,6 @@ btnHowto.addEventListener('click', () => {
 btnPlayAgain.addEventListener('click', playAgain);
 btnChangePlayers.addEventListener('click', changePlayers);
 btnStopQuiz.addEventListener('click', stopQuiz);
-calib.btnNext.addEventListener('click', continueFromCalibration);
 calib.btnKeyboard.addEventListener('click', calibrationFallbackToKeyboard);
 
 /* ---------------- Editor Quiz (Sprint 6) ----------------

@@ -59,8 +59,8 @@ Chrome/Edge/Firefox/Safari).
    mode tersimpan di `localStorage` dan dipulihkan saat reload.
 2. Mode **Kamera** → layar **Kalibrasi**: berdiri berdua menghadap webcam,
    Pemain 1 di sisi kiri frame, Pemain 2 di sisi kanan, angkat kedua tangan
-   hingga terdeteksi stabil 1,5 detik → **Lanjut**. Mode **Keyboard** → langsung
-   ke game.
+   hingga terdeteksi stabil 1,5 detik — permainan **dimulai otomatis** (tanpa
+   tombol). Mode **Keyboard** → langsung ke game.
 3. **Hitungan 3-2-1**, lalu 10 soal dimulai. Setiap soal berbatas waktu
    25 detik; soal selesai lebih cepat bila kedua pemain sudah mengunci atau
    semua balon sudah hilang/tenggelam.
