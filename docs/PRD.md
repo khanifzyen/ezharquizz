@@ -134,9 +134,14 @@ ezharquizz/
 ### F6 — Kamera & Deteksi Tangan (mode Kamera)
 - Kamera diakses via `getUserMedia`; video tampil sebagai **latar penuh** di
   belakang kanvas game (diredupkan agar elemen game terbaca), **mirrored**
-  (efek cermin, agar gerakan terasa natural). Posisi kursor/HUD pemain jatuh
-  persis pada posisi tangan nyata di layar (koordinat tangan dipetakan ke rect
-  letterbox video). *(Revisi Sprint 5: sebelumnya PiP kecil di pojok.)*
+  (efek cermin, agar gerakan terasa natural), dan **memenuhi area sampai tepi
+  kiri-kanan** (`object-fit: cover` — crop atas/bawah sesuai selisih rasio)
+  sehingga zona
+  jawaban di tepi layar tetap berada DALAM gambar video dan tangan pemain
+  tidak keluar dari video saat mengunci jawaban *(revisi Sprint 8; Sprint 5
+  memakai contain/letterbox)*. Posisi kursor/HUD pemain jatuh persis pada
+  posisi tangan nyata di layar (koordinat tangan dipetakan ke rect proyeksi
+  video).
 - **MediaPipe HandLandmarker**, `numHands: 2`, berjalan pada video frame
   (`detectForVideo`).
 - **Kalibrasi pemain:** layar kalibrasi sebelum game — kedua pemain mengangkat

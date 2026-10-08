@@ -640,19 +640,26 @@ body {
 }
 
 /* ---------- Latar video kamera penuh di layar GAME ---------- */
-/* Video tampil menyesuaikan seluruh area bermain (object-fit: contain, mirrored)
-   DI BAWAH kanvas game yang transparan — sehingga kursor pemain digambar tepat
-   di posisi tangan nyata di layar. Rect letterbox dihitung main.js dan dipakai
-   untuk mapping koordinat tangan (hand-input.js) + overlay rangka tangan. */
+/* Video MEMENUHI seluruh area bermain sampai tepi kiri-kanan (object-fit:
+   cover, mirrored) DI BAWAH kanvas game yang transparan — tangan pemain tetap
+   berada DI DALAM gambar video saat menggeser balon ke zona jawaban di tepi
+   (Sprint 8; sebelumnya contain/letterbox → ada bar gelap di area zona).
+   Rect cover (bisa beroffset negatif) dihitung main.js dan dipakai untuk
+   mapping koordinat tangan (hand-input.js) + overlay rangka tangan. */
 
 .camera-bg {
   position: absolute;
   inset: 0;
   overflow: hidden;
   pointer-events: none;
-  background: transparent; /* bar letterbox menyatu dengan latar gelap halaman */
+  background: transparent;
 }
 .camera-bg[hidden] { display: none; }
+
+/* Video khusus latar GAME: cover (memenuhi sampai tepi, crop tipis atas/bawah).
+   Preview kalibrasi memakai .camera-video biasa dengan aspect-ratio yang
+   disamakan sehingga tetap tak terpotong. */
+#camera-bg .camera-video { object-fit: cover; }
 
 /* Pengelapan video agar balon/teks game tetap terbaca jelas. */
 .camera-bg__dim {

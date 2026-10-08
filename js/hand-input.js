@@ -98,11 +98,12 @@ export class HandSource {
   }
 
   /**
-   * Rect tampilan video di dalam kanvas (letterbox object-fit: contain).
-   * Video kamera tampil sebagai LATAR PENUH di belakang kanvas game; agar kursor
-   * jatuh persis di posisi tangan nyata di layar, koordinat normalisasi 0..1
-   * harus dipetakan ke rect video yang benar-benar terlihat — bukan ke seluruh
-   * kanvas. Dipanggil main.js tiap frame UI kamera (cache per ukuran).
+   * Rect tampilan video di dalam kanvas (mode COVER, Sprint 8 — offset bisa
+   * negatif bila video ter-crop). Video kamera tampil sebagai LATAR PENUH
+   * sampai tepi kiri-kanan di belakang kanvas game; koordinat normalisasi
+   * 0..1 dipetakan ke rect video yang benar-benar diproyeksikan agar kursor
+   * jatuh persis di posisi tangan nyata di layar. Dipanggil main.js tiap
+   * frame UI kamera (cache per ukuran).
    * @param {{x:number,y:number,w:number,h:number}|null} rect px kanvas; null = seluruh kanvas
    */
   setVideoRect(rect) {

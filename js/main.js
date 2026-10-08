@@ -28,14 +28,14 @@
  * input renderer diganti KeyboardInputSource tanpa reload (setSources).
  */
 
-// ?v=7 = cache-busting aset (harus sama dengan versi di index.html). Static
+// ?v=8 = cache-busting aset (harus sama dengan versi di index.html). Static
 // hosting & server dev sederhana bisa menyajikan modul lama dari cache —
 // versi pada SETIAP import internal menjamin satu set aset yang konsisten.
-import { loadQuestions, pickRandomQuestions } from './data.js?v=7';
-import { GameRenderer, KeyboardInputSource, DEFAULT_KEYMAPS } from './renderer.js?v=7';
-import { Confetti, FESTIVE_COLORS } from './confetti.js?v=7';
-import { HandSource } from './hand-input.js?v=7';
-import { initEditor } from './editor.js?v=7';
+import { loadQuestions, pickRandomQuestions } from './data.js?v=8';
+import { GameRenderer, KeyboardInputSource, DEFAULT_KEYMAPS } from './renderer.js?v=8';
+import { Confetti, FESTIVE_COLORS } from './confetti.js?v=8';
+import { HandSource } from './hand-input.js?v=8';
+import { initEditor } from './editor.js?v=8';
 
 /* ---------------- Konstanta ---------------- */
 
@@ -670,9 +670,10 @@ function updateGameCameraUi() {
 }
 
 /**
- * Rect video yang benar-benar terlihat di dalam area bermain (letterbox
- * object-fit: contain). Koordinat tangan 0..1 dipetakan ke rect INI, bukan ke
- * seluruh kanvas, sehingga kursor/HUD jatuh persis pada tangan di layar.
+ * Rect tampilan video yang terlihat di dalam area bermain — mode COVER
+ * (Sprint 8): video MEMENUHI area sampai tepi kiri-kanan (offset bisa
+ * negatif = bagian video ter-crop). Koordinat tangan 0..1 dipetakan ke rect
+ * INI sehingga zona jawaban di tepi layar tetap berada DALAM gambar video.
  * @returns {{x:number,y:number,w:number,h:number}|null} null bila video belum siap.
  */
 function computeVideoRect() {
@@ -683,7 +684,10 @@ function computeVideoRect() {
   if (areaW < 2 || areaH < 2) return null;
   const key = `${v.videoWidth}x${v.videoHeight}@${areaW}x${areaH}`;
   if (cam._lastVideoRectKey === key) return cam._lastVideoRect;
-  const scale = Math.min(areaW / v.videoWidth, areaH / v.videoHeight);
+  // cover: skala terbesar → salah satu dimensi memenuhi area, dimensi lain
+  // kelebihan (ter-crop). Contoh: video 1280x720 di area 1280x678 →
+  // rect {x:0, y:-21, w:1280, h:720} — tepi kiri/kanan video = tepi layar.
+  const scale = Math.max(areaW / v.videoWidth, areaH / v.videoHeight);
   const w = v.videoWidth * scale;
   const h = v.videoHeight * scale;
   const rect = { x: (areaW - w) / 2, y: (areaH - h) / 2, w, h };
