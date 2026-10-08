@@ -1,0 +1,963 @@
+/* ============================================================
+   EzharQuiz — style global (tema gelap playful)
+   Warna identitas: P1 oranye #f97316, P2 biru #38bdf8.
+   Tipografi besar & tebal agar terbaca dari jarak 1–2 meter.
+   ============================================================ */
+
+:root {
+  --bg: #0b1020;
+  --bg-panel: rgba(15, 23, 42, 0.78);
+  --line: rgba(148, 163, 184, 0.22);
+  --text: #e8edf7;
+  --muted: #94a3b8;
+  --p1: #f97316;
+  --p2: #38bdf8;
+  --good: #22c55e;
+  --bad: #ef4444;
+  --radius-lg: 26px;
+  --radius-md: 16px;
+  --font-stack: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Noto Sans", Ubuntu, Cantarell, sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
+body {
+  font-family: var(--font-stack);
+  color: var(--text);
+  background:
+    radial-gradient(900px 500px at 12% -10%, rgba(249, 115, 22, 0.16), transparent 60%),
+    radial-gradient(900px 500px at 88% -10%, rgba(56, 189, 248, 0.16), transparent 60%),
+    radial-gradient(1200px 800px at 50% 120%, rgba(167, 139, 250, 0.12), transparent 65%),
+    var(--bg);
+  overflow: hidden;
+}
+
+/* ---------- Layar (state machine via atribut hidden) ---------- */
+
+.screen {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.screen[hidden] { display: none; }
+
+/* ---------- Tombol ---------- */
+
+.btn {
+  font-family: inherit;
+  font-size: 1.15rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  padding: 14px 30px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.12s ease;
+}
+.btn:active { transform: translateY(1px) scale(0.98); }
+
+.btn--primary {
+  color: #1a1207;
+  background: linear-gradient(135deg, #fbbf24, var(--p1));
+  box-shadow: 0 10px 26px rgba(249, 115, 22, 0.35);
+}
+.btn--primary:hover { transform: translateY(-2px); box-shadow: 0 14px 32px rgba(249, 115, 22, 0.45); }
+
+.btn--ghost {
+  color: var(--text);
+  background: rgba(148, 163, 184, 0.12);
+  border-color: var(--line);
+}
+.btn--ghost:hover { background: rgba(148, 163, 184, 0.22); transform: translateY(-2px); }
+
+/* ============================================================
+   LAYAR WELCOME
+   ============================================================ */
+
+.screen--welcome { overflow-y: auto; padding: 24px; }
+
+.welcome-card {
+  width: min(680px, 100%);
+  background: var(--bg-panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 24px 70px rgba(2, 6, 23, 0.6);
+  padding: 36px 40px 30px;
+  backdrop-filter: blur(10px);
+}
+
+.logo {
+  margin: 0;
+  font-size: clamp(3rem, 7vw, 4.4rem);
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  text-align: center;
+}
+.logo span {
+  background: linear-gradient(90deg, var(--p1), var(--p2));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.tagline {
+  margin: 10px 0 26px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+
+/* --- input nama --- */
+
+.name-grid {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 14px;
+  align-items: end;
+}
+
+.name-field label {
+  display: block;
+  font-size: 0.95rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 8px;
+}
+.name-field--p1 label { color: var(--p1); }
+.name-field--p2 label { color: var(--p2); }
+
+.name-field input {
+  width: 100%;
+  font-family: inherit;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text);
+  background: rgba(2, 6, 23, 0.65);
+  border: 2px solid var(--line);
+  border-radius: var(--radius-md);
+  padding: 12px 16px;
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.name-field input::placeholder { color: #52607a; font-weight: 600; }
+.name-field--p1 input:focus { border-color: var(--p1); box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.22); }
+.name-field--p2 input:focus { border-color: var(--p2); box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.22); }
+
+.vs-badge {
+  font-size: 1.1rem;
+  font-weight: 900;
+  color: var(--muted);
+  padding-bottom: 16px;
+}
+
+/* --- pilihan mode kontrol --- */
+
+.mode-field {
+  margin: 24px 0 0;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  padding: 14px 16px 16px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.mode-field legend {
+  padding: 0 10px;
+  font-size: 0.9rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+}
+
+.mode-option {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  border: 2px solid var(--line);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+.mode-option:hover { background: rgba(148, 163, 184, 0.08); }
+.mode-option:has(input:checked) { border-color: var(--good); background: rgba(34, 197, 94, 0.08); }
+.mode-option:has(input:disabled) { cursor: not-allowed; opacity: 0.55; }
+
+.mode-option input { position: absolute; opacity: 0; pointer-events: none; }
+.mode-label { font-size: 1.15rem; font-weight: 800; }
+.mode-label small { color: var(--muted); font-weight: 600; }
+
+.mode-badge {
+  align-self: flex-start;
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  background: rgba(148, 163, 184, 0.15);
+  border-radius: 999px;
+  padding: 3px 10px;
+}
+.mode-badge--ok { color: #0d3d22; background: #4ade80; }
+
+.welcome-error {
+  margin: 16px 0 0;
+  color: #fda4af;
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  border-radius: var(--radius-md);
+  padding: 10px 14px;
+  font-weight: 700;
+}
+
+.welcome-actions {
+  display: flex;
+  justify-content: center;
+  gap: 14px;
+  margin-top: 26px;
+}
+
+/* --- panel cara main --- */
+
+.howto {
+  margin-top: 24px;
+  border-top: 1px dashed var(--line);
+  padding-top: 18px;
+}
+.howto h2 { margin: 0 0 10px; font-size: 1.3rem; }
+.howto ol { margin: 0; padding-left: 22px; line-height: 1.75; color: #cbd5e1; }
+.howto strong { color: var(--text); }
+
+.kbd {
+  display: inline-block;
+  font-size: 0.85em;
+  font-weight: 800;
+  border-radius: 7px;
+  border: 1px solid;
+  padding: 1px 8px;
+  margin: 0 2px;
+  background: rgba(2, 6, 23, 0.7);
+}
+.kbd--p1 { color: var(--p1); border-color: rgba(249, 115, 22, 0.55); }
+.kbd--p2 { color: var(--p2); border-color: rgba(56, 189, 248, 0.55); }
+
+/* ============================================================
+   LAYAR GAME
+   ============================================================ */
+
+.screen--game {
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+}
+
+.game-top {
+  display: grid;
+  grid-template-columns: 1fr minmax(0, 2.2fr) 1fr;
+  gap: 18px;
+  align-items: center;
+  padding: 16px 22px 10px;
+}
+
+.hud {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.hud__name {
+  font-size: clamp(1.05rem, 1.6vw, 1.4rem);
+  font-weight: 800;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.hud__score {
+  font-size: clamp(1.9rem, 3vw, 2.6rem);
+  font-weight: 900;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.hud--p1 { align-items: flex-start; }
+.hud--p1 .hud__name, .hud--p1 .hud__score { color: var(--p1); }
+.hud--p2 { align-items: flex-end; }
+.hud--p2 .hud__name, .hud--p2 .hud__score { color: var(--p2); }
+
+.question-box {
+  text-align: center;
+  background: var(--bg-panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  padding: 10px 22px 14px;
+  min-height: 96px;
+  box-shadow: 0 12px 34px rgba(2, 6, 23, 0.45);
+}
+
+/* Sprint 4: transisi masuk panel pertanyaan tiap ganti soal (di-restart dari JS). */
+.question-box.q-in {
+  animation: qIn 0.4s cubic-bezier(0.2, 0.9, 0.3, 1.15);
+}
+@keyframes qIn {
+  from { opacity: 0; transform: translateY(-10px) scale(0.985); }
+  to { opacity: 1; transform: none; }
+}
+
+.question-meta {
+  font-size: 0.85rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+.question-text {
+  margin: 6px 0 0;
+  font-size: clamp(1.25rem, 2.4vw, 1.85rem);
+  font-weight: 800;
+  line-height: 1.3;
+}
+
+/* Sprint 4: "pop" angka skor HUD saat bertambah (di-restart dari JS). */
+.hud__score.score-pop {
+  animation: scorePop 0.5s cubic-bezier(0.2, 0.9, 0.3, 1.4);
+}
+@keyframes scorePop {
+  0% { transform: scale(1); }
+  35% { transform: scale(1.32); }
+  100% { transform: scale(1); }
+}
+
+/* Sprint 4: notifikasi kecil di arena GAME (mis. kamera terputus). */
+.game-notice {
+  position: absolute;
+  top: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 6;
+  max-width: min(560px, 82%);
+  background: rgba(239, 68, 68, 0.14);
+  border: 1px solid rgba(239, 68, 68, 0.5);
+  color: #fecdd3;
+  font-weight: 800;
+  font-size: 0.98rem;
+  border-radius: 12px;
+  padding: 10px 18px;
+  box-shadow: 0 10px 30px rgba(2, 6, 23, 0.5);
+  text-align: center;
+}
+.game-notice[hidden] { display: none; }
+
+.canvas-wrap {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+}
+#game-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  touch-action: none;
+}
+
+/* ============================================================
+   LAYAR RESULT
+   ============================================================ */
+
+.confetti-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.result-card {
+  position: relative;
+  z-index: 1;
+  width: min(760px, 92vw);
+  text-align: center;
+  background: var(--bg-panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 24px 70px rgba(2, 6, 23, 0.65);
+  padding: 38px 44px 34px;
+  backdrop-filter: blur(10px);
+}
+
+.result-legend {
+  margin: 0 0 20px;
+  font-size: 1rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.28em;
+  color: var(--muted);
+}
+
+.result-scoreboard {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 18px;
+  align-items: center;
+}
+
+.result-player { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.result-player--p1 { align-items: flex-start; text-align: left; }
+.result-player--p2 { align-items: flex-end; text-align: right; }
+.rp-name {
+  font-size: clamp(1.2rem, 2vw, 1.6rem);
+  font-weight: 800;
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.result-player--p1 .rp-name { color: var(--p1); }
+.result-player--p2 .rp-name { color: var(--p2); }
+.rp-score {
+  font-size: clamp(3rem, 6vw, 4.6rem);
+  font-weight: 900;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Sprint 4: ringkasan jumlah jawaban benar per pemain ("7/10 benar"). */
+.rp-correct {
+  font-size: 0.98rem;
+  font-weight: 800;
+  color: var(--muted);
+  letter-spacing: 0.02em;
+}
+.result-player--p1 .rp-correct { color: rgba(249, 115, 22, 0.85); }
+.result-player--p2 .rp-correct { color: rgba(56, 189, 248, 0.85); }
+
+.result-vs { font-size: 1.4rem; font-weight: 900; color: var(--muted); }
+
+.result-winner {
+  margin: 22px 0 26px;
+  font-size: clamp(2rem, 5vw, 3.4rem);
+  font-weight: 900;
+  letter-spacing: 0.01em;
+  line-height: 1.15;
+  background: linear-gradient(90deg, var(--p1), var(--p2));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 6px 18px rgba(2, 6, 23, 0.55));
+}
+
+.result-actions {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+/* ============================================================
+   MODE KAMERA — kalibrasi, PiP, indikator tangan (Sprint 2)
+   ============================================================ */
+
+.mode-badge--beta { color: #172554; background: #93c5fd; }
+
+.calib-p1 { color: var(--p1); font-weight: 800; }
+.calib-p2 { color: var(--p2); font-weight: 800; }
+
+/* ---------- layar kalibrasi ---------- */
+
+.screen--calibration { overflow-y: auto; padding: 24px; }
+
+.calib-card {
+  width: min(920px, 100%);
+  text-align: center;
+  background: var(--bg-panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 24px 70px rgba(2, 6, 23, 0.6);
+  padding: 30px 34px 26px;
+  backdrop-filter: blur(10px);
+}
+
+.calib-title { margin: 0; font-size: clamp(1.7rem, 3vw, 2.3rem); font-weight: 900; }
+
+.calib-instruction {
+  margin: 10px auto 18px;
+  max-width: 620px;
+  color: #cbd5e1;
+  font-weight: 600;
+  line-height: 1.55;
+}
+.calib-instruction strong { color: var(--text); }
+
+.calib-chips {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  max-width: 720px;
+  margin: 0 auto 12px;
+}
+
+/* Chip status tangan — dipakai di kalibrasi (hijau = terdeteksi, merah = hilang). */
+.hand-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 6px 14px;
+  font-size: 0.95rem;
+  font-weight: 800;
+  background: rgba(148, 163, 184, 0.08);
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+.hand-chip--p1 { color: var(--p1); }
+.hand-chip--p2 { color: var(--p2); }
+.hand-chip.is-ok { background: rgba(34, 197, 94, 0.14); border-color: rgba(74, 222, 128, 0.6); }
+
+.hand-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--bad);
+  box-shadow: 0 0 8px rgba(239, 68, 68, 0.8);
+  flex: none;
+}
+.hand-chip.is-ok .hand-dot,
+.hand-indicator.is-ok .hand-dot {
+  background: var(--good);
+  box-shadow: 0 0 10px rgba(74, 222, 128, 0.9);
+}
+
+.calib-video-slot {
+  position: relative;
+  width: min(760px, 100%);
+  margin: 0 auto;
+  aspect-ratio: 16 / 9; /* disinkronkan ke aspek stream asli oleh main.js */
+  background: #05070f;
+  border: 2px solid var(--line);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+/* Video kamera — MIRRORED agar gerakan terasa natural (PRD F6). */
+.camera-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  transform: scaleX(-1);
+}
+
+/* Canvas overlay landmark (digambar dengan koordinat sudah mirrored). */
+.camera-overlay {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.calib-loading {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  color: var(--muted);
+  font-weight: 700;
+  background: rgba(5, 7, 15, 0.72);
+  backdrop-filter: blur(2px);
+}
+
+.calib-progress {
+  height: 10px;
+  max-width: 760px;
+  margin: 18px auto 10px;
+  border-radius: 999px;
+  background: rgba(148, 163, 184, 0.18);
+  overflow: hidden;
+}
+#calib-progress-fill {
+  height: 100%;
+  width: 0%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--p1), var(--good), var(--p2));
+  transition: width 0.12s linear;
+}
+
+.calib-status { margin: 4px 0 6px; min-height: 1.5em; color: #cbd5e1; font-weight: 700; }
+
+/* Sprint 4: tips pencahayaan — deteksi tangan sangat bergantung kualitas cahaya. */
+.calib-tips {
+  margin: 14px auto 0;
+  max-width: 640px;
+  text-align: left;
+  font-size: 0.92rem;
+  color: #cbd5e1;
+  background: rgba(148, 163, 184, 0.08);
+  border: 1px dashed var(--line);
+  border-radius: var(--radius-md);
+  padding: 10px 14px;
+  line-height: 1.55;
+}
+.calib-tips strong { color: var(--text); }
+
+.calib-error {
+  margin: 12px 0 0;
+  color: #fda4af;
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  border-radius: var(--radius-md);
+  padding: 10px 14px;
+  font-weight: 700;
+}
+
+.calib-actions {
+  display: flex;
+  justify-content: center;
+  gap: 14px;
+  margin-top: 18px;
+  flex-wrap: wrap;
+}
+
+/* ---------- Latar video kamera penuh di layar GAME ---------- */
+/* Video tampil menyesuaikan seluruh area bermain (object-fit: contain, mirrored)
+   DI BAWAH kanvas game yang transparan — sehingga kursor pemain digambar tepat
+   di posisi tangan nyata di layar. Rect letterbox dihitung main.js dan dipakai
+   untuk mapping koordinat tangan (hand-input.js) + overlay rangka tangan. */
+
+.camera-bg {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  background: transparent; /* bar letterbox menyatu dengan latar gelap halaman */
+}
+.camera-bg[hidden] { display: none; }
+
+/* Pengelapan video agar balon/teks game tetap terbaca jelas. */
+.camera-bg__dim {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at center, rgba(5, 7, 15, 0.34) 0%, rgba(5, 7, 15, 0.58) 100%);
+}
+
+/* ---------- tombol Stop Kuis di arena GAME ---------- */
+
+.btn-stop {
+  position: absolute;
+  bottom: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 5;
+  padding: 8px 20px;
+  font: inherit;
+  font-size: 0.86rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  color: #fecdd3;
+  background: rgba(159, 18, 57, 0.35);
+  border: 1px solid rgba(244, 63, 94, 0.55);
+  border-radius: 999px;
+  cursor: pointer;
+  backdrop-filter: blur(4px);
+  box-shadow: 0 8px 24px rgba(2, 6, 23, 0.5);
+  transition: background 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+}
+.btn-stop:hover,
+.btn-stop:focus-visible {
+  background: rgba(225, 29, 72, 0.55);
+  border-color: rgba(253, 164, 175, 0.9);
+  transform: translateX(-50%) scale(1.04);
+  outline: none;
+}
+.btn-stop:active { transform: translateX(-50%) scale(0.97); }
+
+/* ---------- indikator status tangan di HUD GAME ---------- */
+
+.hand-indicator {
+  display: none;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+}
+#screen-game.camera-active .hand-indicator { display: inline-flex; }
+
+/* ============================================================
+   LAYAR EDITOR QUIZ (Sprint 6)
+   ============================================================ */
+
+/* tautan-teks kecil (tombol Editor Quiz di WELCOME, dll.) */
+.welcome-tools { margin-top: 14px; text-align: center; }
+.link-btn {
+  background: none;
+  border: none;
+  padding: 6px 10px;
+  font: inherit;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--muted);
+  cursor: pointer;
+  border-radius: 8px;
+  text-decoration: underline dotted;
+  text-underline-offset: 4px;
+}
+.link-btn:hover, .link-btn:focus-visible { color: var(--text); outline: none; }
+.link-btn--danger { color: #fda4af; }
+.link-btn--danger:hover { color: #fecdd3; }
+
+.btn--danger {
+  background: rgba(159, 18, 57, 0.35);
+  border: 1px solid rgba(244, 63, 94, 0.55);
+  color: #fecdd3;
+}
+
+/* ---------- kerangka layar ---------- */
+.editor-shell {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: min(1240px, 96vw);
+  height: min(820px, 94vh);
+  background: var(--bg-panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 24px 70px rgba(2, 6, 23, 0.65);
+  overflow: hidden;
+}
+
+/* ---------- gerbang password ---------- */
+.editor-gate {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(3, 6, 15, 0.9);
+}
+.editor-gate[hidden] { display: none; }
+.editor-gate__card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: min(400px, 90vw);
+  padding: 28px;
+  background: var(--bg-panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  text-align: center;
+}
+.editor-gate__card h2 { margin: 0; }
+.editor-gate__hint { margin: 0; color: var(--muted); font-size: 0.92rem; }
+.editor-gate__card input {
+  width: 100%;
+  padding: 12px 14px;
+  font: inherit;
+  color: var(--text);
+  background: rgba(2, 6, 23, 0.6);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  text-align: center;
+}
+.editor-gate__card input:focus { outline: 2px solid rgba(56, 189, 248, 0.6); }
+.editor-gate__error {
+  margin: 0;
+  color: #fecdd3;
+  background: rgba(159, 18, 57, 0.25);
+  border: 1px solid rgba(244, 63, 94, 0.5);
+  border-radius: 10px;
+  padding: 8px 12px;
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
+/* ---------- header editor ---------- */
+.editor-main {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+.editor-main[hidden] { display: none; }
+.editor-top {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--line);
+  background: rgba(2, 6, 23, 0.45);
+  flex-wrap: wrap;
+}
+.editor-title { margin: 0; font-size: 1.15rem; display: flex; align-items: center; gap: 6px; }
+.editor-dirty { color: #fbbf24; font-size: 1rem; }
+.editor-status {
+  margin-left: auto;
+  padding: 7px 14px;
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: var(--muted);
+  background: rgba(2, 6, 23, 0.55);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  cursor: default;
+  white-space: nowrap;
+}
+.editor-status.is-ok { color: #86efac; border-color: rgba(74, 222, 128, 0.45); }
+.editor-status.is-warn { color: #fde68a; border-color: rgba(251, 191, 36, 0.45); cursor: pointer; }
+.editor-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+/* ---------- tubuh: sidebar + form ---------- */
+.editor-body {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+.editor-side {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 320px;
+  min-width: 260px;
+  padding: 12px;
+  border-right: 1px solid var(--line);
+  background: rgba(2, 6, 23, 0.35);
+}
+.editor-side input[type="search"], .editor-side select {
+  width: 100%;
+  padding: 9px 12px;
+  font: inherit;
+  font-size: 0.9rem;
+  color: var(--text);
+  background: rgba(2, 6, 23, 0.6);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+}
+.editor-list {
+  flex: 1;
+  margin: 0;
+  padding: 4px;
+  overflow-y: auto;
+  list-style: none;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: rgba(2, 6, 23, 0.35);
+}
+.editor-list li {
+  padding: 8px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.86rem;
+  line-height: 1.35;
+  color: var(--muted);
+  border: 1px solid transparent;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.editor-list li:hover { background: rgba(56, 189, 248, 0.08); color: var(--text); }
+.editor-list li.is-selected {
+  background: rgba(56, 189, 248, 0.16);
+  border-color: rgba(56, 189, 248, 0.5);
+  color: var(--text);
+}
+.editor-list li.is-invalid { border-color: rgba(244, 63, 94, 0.55); }
+.editor-list li .li-meta { display: block; font-size: 0.68rem; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase; opacity: 0.7; margin-bottom: 2px; }
+.editor-stats { margin: 0; font-size: 0.78rem; color: var(--muted); text-align: center; }
+
+/* ---------- form soal ---------- */
+.editor-form {
+  flex: 1;
+  min-width: 0;
+  padding: 18px 20px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.ef-row--meta { display: flex; gap: 12px; align-items: end; flex-wrap: wrap; }
+.ef-field { display: flex; flex-direction: column; gap: 6px; }
+.ef-field--grow { flex: 1; min-width: 200px; }
+.ef-field label, .ef-options-label {
+  font-size: 0.74rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--muted);
+}
+.ef-row-actions { display: flex; gap: 8px; }
+.editor-form input[type="text"], .editor-form input[list], .editor-form textarea {
+  width: 100%;
+  padding: 10px 12px;
+  font: inherit;
+  color: var(--text);
+  background: rgba(2, 6, 23, 0.6);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  resize: vertical;
+}
+.editor-form input:focus, .editor-form textarea:focus { outline: 2px solid rgba(56, 189, 248, 0.6); }
+.editor-form input[readonly] { opacity: 0.6; }
+.ef-options { display: flex; flex-direction: column; gap: 8px; }
+.ef-opt { display: flex; align-items: center; gap: 8px; }
+.ef-opt input[type="radio"] { width: 18px; height: 18px; accent-color: #4ade80; cursor: pointer; flex: none; }
+.ef-opt-radio { cursor: pointer; }
+.ef-opt-input { flex: 1; }
+.ef-validation {
+  margin: 0;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: rgba(159, 18, 57, 0.22);
+  border: 1px solid rgba(244, 63, 94, 0.5);
+  color: #fecdd3;
+  font-size: 0.88rem;
+  font-weight: 700;
+  white-space: pre-line;
+}
+
+/* ---------- toast ---------- */
+.editor-toast {
+  position: absolute;
+  bottom: 18px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 20;
+  max-width: min(640px, 90%);
+  padding: 12px 22px;
+  border-radius: 12px;
+  background: rgba(15, 23, 42, 0.95);
+  border: 1px solid rgba(74, 222, 128, 0.5);
+  color: #d1fae5;
+  font-weight: 700;
+  font-size: 0.92rem;
+  text-align: center;
+  box-shadow: 0 14px 40px rgba(2, 6, 23, 0.6);
+}
+.editor-toast.is-warn { border-color: rgba(251, 191, 36, 0.55); color: #fef3c7; }
+.editor-toast[hidden] { display: none; }

@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EzharQuiz — Kuis Jawaban Jatuh 2 Pemain</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎈</text></svg>">
+  <link rel="stylesheet" href="css/style.css?v=6">
+</head>
+<body>
+
+  <!-- ============ LAYAR 1: WELCOME (input nama + mode) ============ -->
+  <section id="screen-welcome" class="screen screen--welcome">
+    <div class="welcome-card">
+      <h1 class="logo">Ezhar<span>Quiz</span></h1>
+      <p class="tagline">Kuis jawaban jatuh &middot; 2 pemain &middot; 1 layar</p>
+
+      <form id="welcome-form" autocomplete="off" novalidate>
+        <div class="name-grid">
+          <div class="name-field name-field--p1">
+            <label for="p1-name">Pemain 1</label>
+            <input id="p1-name" type="text" maxlength="18" placeholder="Pemain 1">
+          </div>
+          <div class="vs-badge" aria-hidden="true">VS</div>
+          <div class="name-field name-field--p2">
+            <label for="p2-name">Pemain 2</label>
+            <input id="p2-name" type="text" maxlength="18" placeholder="Pemain 2">
+          </div>
+        </div>
+
+        <fieldset class="mode-field">
+          <legend>Mode Kontrol</legend>
+          <label class="mode-option">
+            <input type="radio" name="control-mode" value="camera" checked>
+            <span class="mode-label">Kamera <small>(gesture)</small></span>
+            <span class="mode-badge mode-badge--ok">default</span>
+          </label>
+          <label class="mode-option">
+            <input type="radio" name="control-mode" value="keyboard">
+            <span class="mode-label">Keyboard</span>
+          </label>
+        </fieldset>
+
+        <p id="welcome-error" class="welcome-error" hidden></p>
+
+        <div class="welcome-actions">
+          <button type="button" id="btn-howto" class="btn btn--ghost">Cara Main</button>
+          <button type="submit" id="btn-start" class="btn btn--primary">Mulai</button>
+        </div>
+      </form>
+
+      <!-- Akses editor bank soal (Sprint 6) — dilindungi password -->
+      <div class="welcome-tools">
+        <button type="button" id="btn-editor" class="link-btn">🛠 Editor Quiz</button>
+      </div>
+
+      <!-- Panel Cara Main (toggle) -->
+      <div id="howto-panel" class="howto" hidden>
+        <h2>Cara Main</h2>
+        <ol>
+          <li>Ada <strong>10 soal</strong>. Sesi dibuka dengan hitungan <strong>3-2-1</strong>; pertanyaan tampil di panel atas, 4 balon jawaban jatuh perlahan dari atas layar.</li>
+          <li><strong>Tangkap</strong> balon dengan menjepit saat titik jepit kamu menyentuh balon. Mode kamera: jepitkan jempol + telunjuk di depan kamera. Mode keyboard:
+            <span class="kbd kbd--p1">A</span>/<span class="kbd kbd--p1">D</span> gerak &middot; <span class="kbd kbd--p1">W</span> jepit/lepas (Pemain 1),
+            <span class="kbd kbd--p2">←</span>/<span class="kbd kbd--p2">→</span> gerak &middot; <span class="kbd kbd--p2">↑</span> jepit/lepas (Pemain 2).</li>
+          <li><strong>Geser</strong> balon ke zona warna kamu — Pemain 1 kiri (oranye), Pemain 2 kanan (biru) — lalu lepas jepitan untuk <strong>mengunci</strong> jawaban.</li>
+          <li><strong>Mode Kamera</strong> (default): setelah menekan Mulai muncul layar kalibrasi — berdiri berdua menghadap kamera, <span class="calib-p1">Pemain 1</span> di sisi kiri dan <span class="calib-p2">Pemain 2</span> di sisi kanan, angkat tangan hingga terdeteksi stabil. Gerakkan tangan untuk mengarahkan titik jepit; tangan hilang sesaat (< 1,5 detik) saat memegang balon tidak masalah — balon menunggu tangan kembali.</li>
+          <li>Jawaban benar <strong>+10 poin</strong>. Lepas balon di luar zona = balon jatuh kembali. Balon yang mencapai dasar layar hilang.</li>
+          <li>Setiap soal berbatas waktu <strong>25 detik</strong>. Skor tertinggi setelah 10 soal menang!</li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ LAYAR 2: CALIBRATION (hanya mode kamera, Sprint 2) ============ -->
+  <section id="screen-calibration" class="screen screen--calibration" hidden>
+    <div class="calib-card">
+      <h2 class="calib-title">Kalibrasi Tangan</h2>
+      <p class="calib-instruction">
+        <span class="calib-p1">Pemain 1</span> angkat tangan di <strong>sisi kiri</strong> kamera,
+        <span class="calib-p2">Pemain 2</span> di <strong>sisi kanan</strong>.
+        Pertahankan selama 1,5 detik untuk melanjutkan.
+      </p>
+
+      <div class="calib-chips">
+        <span class="hand-chip hand-chip--p1" id="calib-chip-p1"><span class="hand-dot"></span>Pemain 1 &middot; kiri</span>
+        <span class="hand-chip hand-chip--p2" id="calib-chip-p2"><span class="hand-dot"></span>Pemain 2 &middot; kanan</span>
+      </div>
+
+      <!-- video kamera dimasukkan di sini oleh main.js (sebelum canvas overlay) -->
+      <div class="calib-video-slot" id="calib-video-slot">
+        <canvas id="calib-overlay" class="camera-overlay"></canvas>
+        <div id="calib-loading" class="calib-loading">Menyiapkan kamera&hellip;</div>
+      </div>
+
+      <div class="calib-progress" aria-hidden="true"><div id="calib-progress-fill"></div></div>
+      <p class="calib-status" id="calib-status">Menunggu kamera&hellip;</p>
+      <p id="calib-error" class="calib-error" hidden></p>
+
+      <!-- Tips pencahayaan (Sprint 4): deteksi tangan sangat bergantung cahaya -->
+      <div class="calib-tips">
+        <strong>Tips deteksi lebih baik:</strong>
+        pastikan ruangan cukup terang, hindari cahaya kuat dari belakang
+        (jendela/lampu), dan angkat tangan setinggi dada agar seluruh telapak
+        terlihat di dalam frame kamera.
+      </div>
+
+      <div class="calib-actions">
+        <button type="button" id="btn-calib-keyboard" class="btn btn--ghost">Main dengan Keyboard</button>
+        <button type="button" id="btn-calib-next" class="btn btn--primary" disabled>Lanjut</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ LAYAR 3: GAME (pertanyaan + HUD + canvas) ============ -->
+  <section id="screen-game" class="screen screen--game" hidden>
+    <header class="game-top">
+      <div class="hud hud--p1">
+        <span class="hud__name" id="hud-p1-name">Pemain 1</span>
+        <span class="hand-indicator" id="hand-ind-p1"><span class="hand-dot"></span>Tangan</span>
+        <span class="hud__score" id="hud-p1-score">0</span>
+      </div>
+      <div class="question-box" id="question-box">
+        <div class="question-meta" id="question-meta">Soal 1/10</div>
+        <h2 class="question-text" id="question-text">&hellip;</h2>
+      </div>
+      <div class="hud hud--p2">
+        <span class="hud__score" id="hud-p2-score">0</span>
+        <span class="hud__name" id="hud-p2-name">Pemain 2</span>
+        <span class="hand-indicator" id="hand-ind-p2"><span class="hand-dot"></span>Tangan</span>
+      </div>
+    </header>
+    <div class="canvas-wrap">
+      <!-- Latar video kamera penuh (mode kamera): video dimasukkan dinamis oleh
+           main.js; dimmer + overlay rangka tangan berada di atas video, DI BAWAH
+           kanvas game — posisi kursor/HUD persis di posisi tangan nyata. -->
+      <div id="camera-bg" class="camera-bg" hidden>
+        <div class="camera-bg__dim" aria-hidden="true"></div>
+        <canvas id="bg-overlay" class="camera-overlay"></canvas>
+      </div>
+      <canvas id="game-canvas"></canvas>
+      <!-- Notifikasi kecil di arena GAME (Sprint 4 — mis. kamera terputus) -->
+      <div id="game-notice" class="game-notice" hidden></div>
+      <!-- Stop kuis di tengah jalan: tampil selama sesi berjalan -->
+      <button type="button" id="btn-stop-quiz" class="btn-stop" title="Akhiri kuis sekarang">⏹ Stop Kuis</button>
+    </div>
+  </section>
+
+  <!-- ============ LAYAR 4: RESULT (skor + pemenang + confetti) ============ -->
+  <section id="screen-result" class="screen screen--result" hidden>
+    <canvas id="confetti-canvas" class="confetti-canvas"></canvas>
+    <div class="result-card">
+      <p class="result-legend">Hasil Akhir</p>
+      <div class="result-scoreboard">
+        <div class="result-player result-player--p1">
+          <span class="rp-name" id="result-p1-name">Pemain 1</span>
+          <span class="rp-score" id="result-p1-score">0</span>
+          <span class="rp-correct" id="result-p1-correct">0/10 benar</span>
+        </div>
+        <div class="result-vs" aria-hidden="true">VS</div>
+        <div class="result-player result-player--p2">
+          <span class="rp-name" id="result-p2-name">Pemain 2</span>
+          <span class="rp-score" id="result-p2-score">0</span>
+          <span class="rp-correct" id="result-p2-correct">0/10 benar</span>
+        </div>
+      </div>
+      <h2 class="result-winner" id="result-winner">SERI!</h2>
+      <div class="result-actions">
+        <button type="button" id="btn-play-again" class="btn btn--primary">Main Lagi</button>
+        <button type="button" id="btn-change-players" class="btn btn--ghost">Ganti Pemain</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ LAYAR 5: EDITOR QUIZ (Sprint 6 — dilindungi password) ============ -->
+  <section id="screen-editor" class="screen screen--editor" hidden>
+    <div class="editor-shell">
+
+      <!-- Gerbang 1: login password -->
+      <div id="editor-gate-login" class="editor-gate" hidden>
+        <form id="editor-login-form" class="editor-gate__card" autocomplete="off">
+          <h2>🔒 Editor Quiz</h2>
+          <p class="editor-gate__hint">Masukkan password editor untuk melanjutkan.</p>
+          <input id="editor-login-pw" type="password" placeholder="Password" autocomplete="current-password">
+          <p id="editor-login-error" class="editor-gate__error" hidden></p>
+          <button type="submit" class="btn btn--primary">Masuk</button>
+          <button type="button" id="btn-editor-login-cancel" class="btn btn--ghost">Batal</button>
+          <button type="button" id="btn-editor-reset-pw" class="link-btn link-btn--danger" hidden>Lupa password? Reset ke default</button>
+        </form>
+      </div>
+
+      <!-- Gerbang 2: wajib ganti password default -->
+      <div id="editor-gate-newpass" class="editor-gate" hidden>
+        <form id="editor-newpass-form" class="editor-gate__card" autocomplete="off">
+          <h2>🔐 Ganti Password</h2>
+          <p class="editor-gate__hint">Anda memakai <strong>password default</strong>.
+            Buat password baru (min. 4 karakter) sebelum masuk editor.</p>
+          <input id="editor-np1" type="password" placeholder="Password baru" autocomplete="new-password">
+          <input id="editor-np2" type="password" placeholder="Ulangi password baru" autocomplete="new-password">
+          <p id="editor-np-error" class="editor-gate__error" hidden></p>
+          <button type="submit" class="btn btn--primary">Simpan &amp; Masuk Editor</button>
+        </form>
+      </div>
+
+      <!-- Editor utama -->
+      <div id="editor-main" class="editor-main" hidden>
+        <header class="editor-top">
+          <button type="button" id="btn-editor-back" class="btn btn--ghost">← Kembali</button>
+          <h2 class="editor-title">🛠 Editor Quiz <span id="editor-dirty" class="editor-dirty" title="Ada perubahan belum disimpan" hidden>●</span></h2>
+          <button type="button" id="editor-file-status" class="editor-status" title="Status file bank soal">…</button>
+          <div class="editor-actions">
+            <button type="button" id="btn-editor-open-file" class="btn btn--ghost">📁 Buka File…</button>
+            <button type="button" id="btn-editor-download" class="btn btn--ghost">⬇ Unduh JSON</button>
+            <button type="button" id="btn-editor-save" class="btn btn--primary">💾 Simpan</button>
+          </div>
+        </header>
+
+        <div class="editor-body">
+          <aside class="editor-side">
+            <input id="editor-search" type="text" placeholder="Cari soal / opsi…">
+            <select id="editor-cat-filter" title="Filter kategori"></select>
+            <button type="button" id="btn-editor-add" class="btn btn--ghost">+ Soal Baru</button>
+            <ul id="editor-list" class="editor-list" size="1"></ul>
+            <p id="editor-stats" class="editor-stats"></p>
+          </aside>
+
+          <form id="editor-form" class="editor-form" autocomplete="off" novalidate>
+            <div class="ef-row ef-row--meta">
+              <div class="ef-field">
+                <label for="ef-id">ID</label>
+                <input id="ef-id" type="text" readonly>
+              </div>
+              <div class="ef-field ef-field--grow">
+                <label for="ef-category">Kategori</label>
+                <input id="ef-category" type="text" list="editor-cat-list" placeholder="mis. Geografi">
+                <datalist id="editor-cat-list"></datalist>
+              </div>
+              <div class="ef-row-actions">
+                <button type="button" id="btn-editor-dup" class="btn btn--ghost">⧉ Duplikat</button>
+                <button type="button" id="btn-editor-del" class="btn btn--danger">🗑 Hapus</button>
+              </div>
+            </div>
+
+            <div class="ef-field">
+              <label for="ef-question">Pertanyaan</label>
+              <textarea id="ef-question" rows="3" placeholder="Tulis pertanyaan di sini…"></textarea>
+            </div>
+
+            <div class="ef-options">
+              <label class="ef-options-label">Pilihan jawaban — pilih radio pada jawaban yang <strong>benar</strong>:</label>
+              <div class="ef-opt">
+                <input type="radio" name="ef-correct" value="0" id="ef-c0"><label for="ef-c0" class="ef-opt-radio" title="Tandai benar">✓</label>
+                <input id="ef-o0" type="text" class="ef-opt-input" placeholder="Opsi A">
+              </div>
+              <div class="ef-opt">
+                <input type="radio" name="ef-correct" value="1" id="ef-c1"><label for="ef-c1" class="ef-opt-radio" title="Tandai benar">✓</label>
+                <input id="ef-o1" type="text" class="ef-opt-input" placeholder="Opsi B">
+              </div>
+              <div class="ef-opt">
+                <input type="radio" name="ef-correct" value="2" id="ef-c2"><label for="ef-c2" class="ef-opt-radio" title="Tandai benar">✓</label>
+                <input id="ef-o2" type="text" class="ef-opt-input" placeholder="Opsi C">
+              </div>
+              <div class="ef-opt">
+                <input type="radio" name="ef-correct" value="3" id="ef-c3"><label for="ef-c3" class="ef-opt-radio" title="Tandai benar">✓</label>
+                <input id="ef-o3" type="text" class="ef-opt-input" placeholder="Opsi D">
+              </div>
+            </div>
+
+            <p id="ef-validation" class="ef-validation" hidden></p>
+          </form>
+        </div>
+      </div>
+
+      <div id="editor-toast" class="editor-toast" hidden></div>
+    </div>
+  </section>
+
+  <!-- ?v=N = cache-busting aset; naikkan versi setiap kali css/js berubah
+       (static hosting seperti GitHub Pages/Netlify meng-cache agresif). -->
+  <script type="module" src="js/main.js?v=6"></script>
+</body>
+</html>
